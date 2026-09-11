@@ -301,3 +301,138 @@ uv run pytest tests/test_grounded_answers.py -v > outputs/grounded_answers_test_
 ### Task 3 Result
 
 Task 3 successfully demonstrates the retrieval and generation stages of RAG. Relevant chunks are retrieved from the FAISS index, passed as context to the model, and used to generate answers that include inline source and page citations.
+
+---
+
+## Task 4 — Refusal
+
+### Objective
+
+The goal of this task is to prevent the RAG system from answering when the retrieved evidence is too weak.
+
+If the highest retrieval score is below the configured threshold, the system returns exactly:
+
+```text id="nqjv2v"
+insufficient evidence
+```
+
+The model is not called when retrieval fails the evidence threshold.
+
+### Implementation
+
+The refusal pipeline is implemented in:
+
+```text id="xbkco"
+refusal/refusal.py
+```
+
+The pipeline performs the following steps:
+
+1. Loads the FAISS vector store created in Task 2.
+2. Retrieves the top 4 chunks together with their relevance scores.
+3. Reads the highest retrieval score.
+4. Compares the top score against a configured threshold.
+5. Refuses immediately when the score is below the threshold.
+6. Generates a grounded and cited answer only when sufficient evidence is available.
+
+### Retrieval with Scores
+
+Unlike Task 3, which retrieved documents only, Task 4 retrieves both the documents and their relevance scores.
+
+```python id="jiz3od"
+results = store.similarity_search_with_relevance_scores(
+    question,
+    k=TOP_K,
+)
+```
+
+Each result contains a document together with its retrieval score.
+
+This allows the system to make a measurable decision about whether the retrieved evidence is strong enough to answer.
+
+### Threshold Calibration
+
+The initial threshold tested was:
+
+```python id="m6ujzn"
+SCORE_THRESHOLD = 0.05
+```
+
+This threshold is specific to the embedding and retrieval configuration used in this project and was selected using measured retrieval behaviour rather than assuming a universal similarity threshold.
+
+### Refusal Before Generation
+
+The evidence check happens before the chat model is called:
+
+```python id="8ddduj"
+if not has_sufficient_evidence(results):
+    return "insufficient evidence", results
+```
+
+This is important because the language model may already know the answer to an unrelated question from its training data.
+
+For example, even though the model may know the capital of Brazil, the system refuses because that information is not sufficiently supported by the indexed book.
+
+This keeps the answer grounded in the RAG knowledge base.
+
+### Grounded Answer Behaviour
+
+When the retrieval score passes the threshold, the retrieved chunks are formatted with their source and page metadata and passed to the model.
+
+The model is instructed to answer only from the supplied context and include inline citations in the format:
+
+```text id="c0z8oh"
+[source pN]
+```
+
+### Run the Refusal Pipeline
+
+```bash id="u5iq1c"
+uv run python -m refusal.refusal
+```
+
+### Save the Output
+
+```bash id="8t84bc"
+uv run python -m refusal.refusal > outputs/refusal_output.txt
+```
+
+### Testing
+
+Automated tests are included in:
+
+```text id="71c1gr"
+tests/test_refusal.py
+```
+
+The tests verify:
+
+* A score above the threshold is accepted.
+* A score below the threshold is rejected.
+* Empty retrieval results are rejected.
+* Citation metadata remains available for accepted evidence.
+
+### Run the Tests
+
+```bash id="8ttmlc"
+uv run pytest tests/test_refusal.py -v
+```
+
+### Save Test Evidence
+
+```bash id="q1wgoj"
+uv run pytest tests/test_refusal.py -v > outputs/refusal_test_output.txt
+```
+
+### Task 4 Result
+
+Task 4 successfully adds score-based refusal to the RAG pipeline.
+
+Relevant questions that pass the calibrated evidence threshold can proceed to grounded answer generation, while weak or unrelated retrieval results return exactly:
+
+```text id="5ebm95"
+insufficient evidence
+```
+
+This prevents the model from answering unsupported questions using outside knowledge and provides measurable evidence for the refusal decision.
+
