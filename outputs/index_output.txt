@@ -1,0 +1,10 @@
+Chunks received from ingestion: 254
+
+RAG INDEXING COMPLETE
+---------------------
+Pages processed: 136
+Chunks indexed: 254
+Vector store saved to: vector_store
+
+Sample indexed metadata:
+{'producer': 'calibre 3.48.0 [https://calibre-ebook.com]', 'creator': 'calibre 3.48.0 [https://calibre-ebook.com]', 'creationdate': '2020-02-14T13:46:47+00:00', 'author': 'Sudha Murty', 'title': "Grandma's Bag of Stories", 'source': 'data/book.pdf', 'total_pages': 136, 'page': 2, 'page_label': '3', 'chunk_id': 0}
