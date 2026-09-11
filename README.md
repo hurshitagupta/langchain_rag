@@ -436,3 +436,177 @@ insufficient evidence
 
 This prevents the model from answering unsupported questions using outside knowledge and provides measurable evidence for the refusal decision.
 
+---
+
+## Task 5 — Evaluation
+
+### Objective
+
+The goal of this task is to evaluate the complete RAG pipeline using a fixed set of 20 questions and report numerical results for answer accuracy and citation correctness.
+
+The evaluation uses the RAG pipeline implemented in the previous tasks, including retrieval, score-based refusal, grounded answer generation, and inline citations.
+
+### Evaluation Set
+
+A fixed evaluation set of 20 questions is defined in:
+
+```text
+evaluation/evaluation.py
+```
+
+The evaluation contains:
+
+* 10 questions that should be answerable using the indexed book.
+* 10 questions that are intentionally unrelated to the book and should return `insufficient evidence`.
+
+Each evaluation case contains:
+
+```python
+{
+    "question": "...",
+    "expected": "...",
+    "should_refuse": False,
+}
+```
+
+For unrelated questions, `expected` is set to `None` and `should_refuse` is set to `True`.
+
+### Running the RAG Pipeline
+
+The evaluation reuses the actual RAG pipeline from Task 4:
+
+```python
+from refusal.refusal import answer_question
+```
+
+### Answer Accuracy
+
+For answerable questions, the expected answer is compared with the generated answer.
+
+The text is normalized before comparison so that differences such as Unicode spaces, curly apostrophes, and formatting do not incorrectly mark a correct answer as wrong.
+
+For example:
+
+```text
+Expected: Sudha Murty
+
+Generated:
+The book was written by Sudha Murty [data/book.pdf p136].
+```
+
+This is counted as a correct answer.
+
+For questions that should be refused, the answer is considered correct only when the system returns exactly:
+
+```text
+insufficient evidence
+```
+
+Answer accuracy is calculated as:
+
+```text
+Correct Answers / 20 × 100
+```
+
+### Citation Correctness
+
+Citation correctness is evaluated separately for the 10 answerable questions.
+
+The evaluator extracts citations from the generated answer and checks them against the metadata of the documents actually retrieved by FAISS.
+
+The evaluator then checks whether the cited source and page were present in the retrieved documents.
+
+This prevents a citation from being counted as correct simply because the model generated something that looks like a citation.
+
+Citation correctness is calculated as:
+
+```text
+Correct Citations / Answerable Questions × 100
+```
+
+### Refusal Accuracy
+
+The evaluation also measures whether unrelated questions are correctly rejected.
+
+Examples include questions about general knowledge that is not supported by the indexed book.
+
+For these cases, the expected response is:
+
+```text
+insufficient evidence
+```
+
+During evaluation, all 10 intentionally unrelated questions were correctly refused.
+
+### Latency Measurement
+
+The execution time for every evaluation question is measured using:
+
+```python
+time.perf_counter()
+```
+
+The total execution time is used to calculate the average latency across the 20-question evaluation set.
+
+This provides an additional numerical measurement of the RAG pipeline's runtime performance.
+
+
+### Run the Evaluation
+
+```bash
+uv run python -m evaluation.evaluation
+```
+
+### Save Evaluation Evidence
+
+```bash
+uv run python -m evaluation.evaluation > outputs/evaluation_output.txt
+```
+
+The saved output provides evidence for all 20 evaluation cases together with the final numerical metrics.
+
+### Automated Tests
+
+Automated tests are included in:
+
+```text
+tests/test_evaluation.py
+```
+
+The tests verify:
+
+* Correct answer detection.
+* Incorrect citation detection.
+* Correct citation detection.
+* Correct refusal detection.
+
+The tests use deterministic documents and do not require unnecessary provider calls.
+
+### Run the Tests
+
+```bash
+uv run pytest tests/test_evaluation.py -v
+```
+
+### Save Test Evidence
+
+```bash
+uv run pytest tests/test_evaluation.py -v > outputs/evaluation_test_output.txt
+```
+
+### Task 5 Result
+
+Task 5 completes the end-to-end RAG evaluation using a fixed 20-question dataset.
+
+The evaluation measures:
+
+* Answer accuracy.
+* Citation correctness.
+* Refusal accuracy.
+* Average latency.
+
+The results provide numerical evidence of both the strengths and failure cases of the implemented RAG pipeline rather than assuming that every generated response is correct.
+
+The evaluation also demonstrated that the score-based refusal mechanism successfully rejected all 10 intentionally unrelated questions in the evaluation set.
+
+
