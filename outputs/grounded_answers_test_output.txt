@@ -1,0 +1,18 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_rag\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_rag
+configfile: pyproject.toml
+plugins: anyio-4.15.1, langsmith-0.12.4
+collecting ... collected 2 items
+
+tests/test_grounded_answers.py::test_grounded_retrieval_success PASSED   [ 50%]
+tests/test_grounded_answers.py::test_empty_question_failure PASSED       [100%]
+
+============================== warnings summary ===============================
+grounded_answers\grounded_answers.py:5
+  C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_rag\grounded_answers\grounded_answers.py:5: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+    from langchain_community.vectorstores import FAISS
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 2 passed, 1 warning in 3.95s =========================

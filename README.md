@@ -185,3 +185,119 @@ uv run pytest tests/test_index.py -v > outputs/index_test_output.txt
 Task 2 successfully converts the **254 chunks from 136 PDF pages into embedding vectors and stores all 254 vectors in FAISS**.
 
 The required `source`, `page`, and `chunk_id` metadata is preserved, and the vector index is persisted locally for use in the retrieval and grounded-answer stages.
+
+---
+
+## Task 3 — Grounded Answers
+
+### Objective
+
+The goal of this task is to answer user questions using only the context retrieved from the vector store and include inline citations containing the source and page number.
+
+### Implementation
+
+The grounded RAG pipeline is implemented in:
+
+```text
+grounded_answers/grounded_answers.py
+```
+
+The pipeline performs the following steps:
+
+1. Loads the FAISS index created in Task 2.
+2. Converts the user question into an embedding using the same embedding model.
+3. Retrieves the top 4 most relevant chunks from the vector store.
+4. Formats the retrieved chunks together with source and page information.
+5. Sends only the retrieved context and question to the chat model.
+6. Instructs the model to answer only from the supplied context.
+7. Requires inline citations in the format `[source pN]`.
+
+### Retrieval
+
+The retrieval step uses FAISS similarity search:
+
+```python
+documents = store.similarity_search(
+    question,
+    k=TOP_K,
+)
+```
+
+The value of `TOP_K` is set to:
+
+```text
+4
+```
+
+This means that only the four most relevant chunks are selected for answering the question instead of sending the complete document to the model.
+
+### Context Formatting
+
+Retrieved documents are formatted with their citation metadata.
+
+The context includes both the text and its original source information so that the model can generate grounded citations.
+
+### Page Metadata
+
+The PDF loader provides both an internal page number and a page label.
+
+Where available, `page_label` is used for citations because it corresponds more closely to the visible PDF page number.
+
+If `page_label` is not available, the normal `page` metadata is used as a fallback.
+
+### Grounding Prompt
+
+The model is explicitly instructed to:
+
+* Use only the retrieved context.
+* Avoid outside knowledge.
+* Add inline citations.
+* Return `insufficient evidence` if the provided context is not enough.
+
+This helps reduce unsupported answers and keeps the response tied to retrieved evidence.
+
+### Run the Grounded Answer Pipeline
+
+```bash
+uv run python -m grounded_answers.grounded_answers
+```
+
+### Save the Output
+
+```bash
+uv run python -m grounded_answers.grounded_answers > outputs/grounded_answers_output.txt
+```
+### Testing
+
+Automated tests are included in:
+
+```text
+tests/test_grounded_answers.py
+```
+
+The success test verifies that:
+
+* Retrieval returns relevant document content.
+* Retrieved context contains the expected information.
+* Source metadata is included.
+* Page metadata is included in the citation.
+
+The failure test verifies that an empty question is rejected with a `ValueError`.
+
+The tests use a small fake retrieval store so that unit testing remains deterministic and does not require an external API call.
+
+### Run the Tests
+
+```bash
+uv run pytest tests/test_grounded_answers.py -v
+```
+
+### Save Test Evidence
+
+```bash
+uv run pytest tests/test_grounded_answers.py -v > outputs/grounded_answers_test_output.txt
+```
+
+### Task 3 Result
+
+Task 3 successfully demonstrates the retrieval and generation stages of RAG. Relevant chunks are retrieved from the FAISS index, passed as context to the model, and used to generate answers that include inline source and page citations.

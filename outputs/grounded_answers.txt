@@ -1,0 +1,14 @@
+QUESTION:
+Who is the author of the book?
+
+RETRIEVED CHUNKS:
+4
+
+RETRIEVED METADATA:
+{'source': 'data/book.pdf', 'page': 135, 'page_label': '136', 'chunk_id': 252}
+{'source': 'data/book.pdf', 'page': 6, 'page_label': '7', 'chunk_id': 5}
+{'source': 'data/book.pdf', 'page': 134, 'page_label': '135', 'chunk_id': 250}
+{'source': 'data/book.pdf', 'page': 135, 'page_label': '136', 'chunk_id': 251}
+
+GROUNDED ANSWER:
+The book was written by Sudha Murty【data/book.pdf p136】.
