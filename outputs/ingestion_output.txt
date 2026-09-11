@@ -1,0 +1,13 @@
+RAG INGESTION COMPLETE
+----------------------
+Pages loaded: 136 
+Chunks created: 254 
+Average chunk size: 744.52 
+Smallest chunk: 9 
+Largest chunk: 900 
+
+Sample chunk metadata: 
+{'producer': 'calibre 3.48.0 [https://calibre-ebook.com]', 'creator': 'calibre 3.48.0 [https://calibre-ebook.com]', 'creationdate': '2020-02-14T13:46:47+00:00', 'author': 'Sudha Murty', 'title': "Grandma's Bag of Stories", 'source': 'data/book.pdf', 'total_pages': 136, 'page': 2, 'page_label': '3', 'chunk_id': 0} 
+
+Sample chunk: 
+SUDHA MURTY G R A N D M A ’ S B A G O F S T O R I E S Illustrations By Priya Kuriyan PUFFIN BOOKS

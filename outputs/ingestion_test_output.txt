@@ -1,0 +1,19 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_rag\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_rag
+configfile: pyproject.toml
+plugins: anyio-4.15.1, langsmith-0.12.4
+collecting ... collected 3 items
+
+tests/test_ingestion.py::test_ingestion_success PASSED                   [ 33%]
+tests/test_ingestion.py::test_clean_text_failure_case PASSED             [ 66%]
+tests/test_ingestion.py::test_missing_pdf PASSED                         [100%]
+
+============================== warnings summary ===============================
+ingestion\ingestion.py:3
+  C:\Users\Hurshita Gupta\OneDrive\Desktop\langchain_rag\ingestion\ingestion.py:3: DeprecationWarning: `langchain-community` is being sunset and is no longer actively maintained. See https://github.com/langchain-ai/langchain-community/issues/674 for details and migration guidance toward standalone integration packages.
+    from langchain_community.document_loaders import PyPDFLoader
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 3 passed, 1 warning in 1.02s =========================
